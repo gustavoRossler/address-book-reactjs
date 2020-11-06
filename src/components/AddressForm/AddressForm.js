@@ -147,7 +147,7 @@ const AddressForm = (props) => {
         <>
             <Modal show={props.showModal} onHide={props.onHideModal} animation={false} size="lg">
                 <Modal.Header>
-                    <h2>Cadastro</h2>
+                    <h2>Cadastro/Alteração</h2>
                 </Modal.Header>
                 <Modal.Body>
                     <Form noValidate validated={validated} onSubmit={(e) => handleSubmit(e)}>
@@ -229,8 +229,8 @@ const AddressForm = (props) => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={props.onHideModal}>Cancelar</Button>
-                        &nbsp;&nbsp;&nbsp;
-                        <Button onClick={(e) => handleSubmit(e)}>Salvar</Button>
+                    &nbsp;&nbsp;&nbsp;
+                    <Button onClick={(e) => handleSubmit(e)}>Salvar</Button>
                 </Modal.Footer>
             </Modal>
 
