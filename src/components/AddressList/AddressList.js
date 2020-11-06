@@ -99,6 +99,9 @@ const AddressList = () => {
             <p>
                 <Button onClick={toggleModalForm}>Adicionar</Button>
             </p>
+            <h4>
+                Endereços cadastrados
+            </h4>
             <Table bordered hover>
                 <thead>
                     <tr>
