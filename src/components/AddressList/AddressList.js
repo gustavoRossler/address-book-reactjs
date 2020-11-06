@@ -1,15 +1,43 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button, Table } from 'react-bootstrap';
 import { AddressesContext } from '../../contexts/AddressesContext';
+import AddressDetails from '../AddressDetails/AddressDetails';
 import AddressForm from '../AddressForm/AddressForm';
+import { FaSortAlphaDownAlt, FaSortAlphaDown, FaEye, FaTrash, FaEdit } from 'react-icons/fa';
 import './index.css';
 
 const AddressList = () => {
     const [showModalForm, setShowModalForm] = useState(false);
+    const [showModalDetails, setShowModalDetails] = useState(false);
     const [addressEdit, setAddressEdit] = useState('');
+    const [addressView, setAddressView] = useState('');
+    const [sortByName, setSortByName] = useState('');
+    const [sortByAddress, setSortByAddress] = useState('');
+
+    const handleSortByAddress = () => {
+        setSortByName('');
+        setSortByAddress((sortByAddress === 'asc') ? 'desc' : 'asc');
+
+    }
+
+    const handleSortByName = () => {
+        setSortByAddress('');
+        setSortByName((sortByName === 'asc') ? 'desc' : 'asc');
+
+    }
+
+    const toggleModalDetails = () => {
+        setShowModalDetails(!showModalDetails);
+        if (!showModalDetails) {
+            setAddressView('');
+        }
+    }
 
     const toggleModalForm = () => {
         setShowModalForm(!showModalForm);
+        if (!showModalForm) {
+            setAddressEdit('');
+        }
     }
 
     const { addresses, dispatch } = useContext(AddressesContext);
@@ -22,6 +50,12 @@ const AddressList = () => {
 
     const closeModalForm = () => {
         setShowModalForm(false);
+        setAddressView('');
+    }
+
+    const closeModalDetails = () => {
+        setShowModalDetails(false);
+        setAddressEdit('');
     }
 
     const editAddress = (address) => {
@@ -29,8 +63,38 @@ const AddressList = () => {
         setShowModalForm(true);
     }
 
+    const viewAddress = (address) => {
+        setAddressView(address);
+        setShowModalDetails(true);
+    }
+
+    const sortList = (a, b) => {
+        if (b.defaultShippingAddress || b.billingAddress) {
+            return 1;
+        }
+        if (sortByName !== '') {
+            if (sortByName === 'asc') {
+                return (a.name.replace(/ /g, '') < b.name.replace(/ /g, '')) ? 1 : -1;
+            } else {
+                return (a.name.replace(/ /g, '') > b.name.replace(/ /g, '')) ? 1 : -1;
+            }
+        } else if (sortByAddress !== '') {
+            if (sortByAddress === 'asc') {
+                return (a.address.replace(/ /g, '') < b.address.replace(/ /g, '')) ? 1 : -1;
+            } else {
+                return (a.address.replace(/ /g, '') > b.address.replace(/ /g, '')) ? 1 : -1;
+            }
+        }
+        return 0;
+    }
+
+    useEffect(() => {
+        addresses.sort((a, b) => sortList(a, b));
+    }, [sortByAddress, sortByName, addresses]);
+
     return (
         <>
+            <AddressDetails showModal={showModalDetails} onHideModal={toggleModalDetails} closeModal={closeModalDetails} address={addressView} />
             <AddressForm showModal={showModalForm} onHideModal={toggleModalForm} addressEdit={addressEdit} closeModal={closeModalForm} />
             <p>
                 <Button onClick={toggleModalForm}>Adicionar</Button>
@@ -38,24 +102,35 @@ const AddressList = () => {
             <Table bordered hover>
                 <thead>
                     <tr>
-                        <th>Nome</th>
-                        <th>Endereço</th>
+                        <th onClick={handleSortByName} style={{ cursor: 'pointer', textDecoration: 'underline' }}>
+                            {(sortByName === 'desc') ? <FaSortAlphaDownAlt /> : ''}
+                            {(sortByName === 'asc') ? <FaSortAlphaDown /> : ''}
+                            &nbsp;Nome
+                        </th>
+                        <th onClick={handleSortByAddress} style={{ cursor: 'pointer', textDecoration: 'underline' }}>
+                            {(sortByAddress === 'desc') ? <FaSortAlphaDownAlt /> : ''}
+                            {(sortByAddress === 'asc') ? <FaSortAlphaDown /> : ''}
+                            Endereço
+                        </th>
                         <th>Cidade/UF</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {(addresses.length > 0) ? addresses.map(address =>
-                        <tr key={address.id}>
+                        <tr key={address.id} style={{ background: (address.defaultShippingAddress || address.billingAddress) ? '#fff9de' : '#fff' }}>
                             <td>{address.name}</td>
                             <td>{address.address}</td>
                             <td>{address.city}/{address.uf}</td>
                             <td>
+                                <Button type="button" variant="secondary" size="sm"
+                                    onClick={() => viewAddress(address)}><FaEye /> Visualisar</Button>
+                                &nbsp;&nbsp;&nbsp;
                                 <Button type="button" variant="primary" size="sm"
-                                    onClick={() => editAddress(address)}>Editar</Button>
+                                    onClick={() => editAddress(address)}><FaEdit /> Editar</Button>
                                 &nbsp;&nbsp;&nbsp;
                                 <Button type="button" variant="danger" size="sm"
-                                    onClick={() => confirmRemoveAddress(address.id)}>Excluir</Button>
+                                    onClick={() => confirmRemoveAddress(address.id)}><FaTrash /> Excluir</Button>
                             </td>
                         </tr>
                     ) : (<tr>
