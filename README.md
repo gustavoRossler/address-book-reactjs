@@ -1,6 +1,6 @@
 # Abou the app
 
-This is a demo project about a address book, using reactJs framwork.
+This is a demo project about a address book, using reactJs framework.
 
 ## External tools
 
